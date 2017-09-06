@@ -135,6 +135,27 @@
 
 \section{Progress}
 
+\begin{itemize}
+\item It has been argued that continuum-model radii *should* be
+  dependent on the atomic charges.
+\item Build on Bardhan12-CSD review argument, and PCM apparent surface
+  charge (emphasis on apparent!) argument, that the physical picture
+  of the ``correct'' radius is a red herring.  the important thing is
+  to find a model where the potential is correct where the charge
+  distribution is not zero.
+\item From this perspective, it shouldn't matter what radii we choose
+  *so long as the radii are chosen from a physically consistent point
+  of view.* (Note Bernie's comment that the radii of CHARMM atoms with
+  lone pairs might be done differently than the others, and that
+  that's where we have our major errors. double check, of course, this
+  conversation).
+\item So, taking MD Rmin/2 as our starting point: what kind of
+  electrostatic model can reproduce charging free energies if we don't
+  fit?  require it to capture asymmetry, as well as changes in free
+  energy on changes in charge distribution.
+\item simple physical picture for Born ions.
+\item MolaviTabrizi16 JCTC has an expanded argument about what we've done.  
+\end{itemize}
 
 \section{Recent work}
 \begin{itemize}
@@ -165,7 +186,7 @@
 
 * The model works equally well in both protic and aprotic solvents, suggesting that hydrogen bonding does not need to be included explicitly.
 
-* The model's accounting for the electrostatic charging free energy of hydrophobic groups suggests that we should revisit analysis of nonpolar solvation.
+* The model's accounting for the electrostatic charging free energy of hydrophobic groups suggests that we should revisit analysis of nonpolar solvation.  In particular, following the work of Wagoner and Baker: what remains of the solvation free energy after we subtract the new SLIC electrostatic term?  
 
 \section*{Acknowledgments}
 JPB gratefully acknowledges support from the  the National Institute of General Medical Sciences of the National Institutes of Health under Award Number R21GM102642.  The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health.  JPB thanks M. Knepley, I. Tsukerman, D. Xie, and L. R. Scott for valuable discussions, and M. Fenley for valuable comments on the manuscript.
