@@ -1,0 +1,964 @@
+\documentclass[reprint, letterpaper, nobibnotes, aps, superscriptaddress,prb]{revtex4-1}
+
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amsmath}
+%\usepackage{color}
+%\usepackage{url}
+%\usepackage{multirow}
+%\usepackage{graphicx}        % standard LaTeX graphics tool
+                             % when including figure files
+%\usepackage{minted}
+
+
+% Color macros
+\newcommand{\blue}{\textcolor{blue}}
+\newcommand{\green}{\textcolor{green}}
+\newcommand{\red}{\textcolor{red}}
+\newcommand{\brown}{\textcolor{brown}}
+\newcommand{\cyan}{\textcolor{cyan}}
+\newcommand{\magenta}{\textcolor{magenta}}
+\newcommand{\yellow}{\textcolor{yellow}}
+\tracinggroups=1
+% Author notes
+%\usepackage[colorinlistoftodos, textwidth=4cm, shadow]{todonotes}
+%\newcommand{\note}[1]{\todo[color=orange!40,inline]{{\bf Note:} #1}}
+%\newcommand{\jay}[1]{\todo[color=blue!40,inline]{{\bf Jay:} #1}}
+%\newcommand{\matt}[1]{\todo[color=green!40,inline]{{\bf Matt:} #1}}
+%\newcommand{\fixme}[1]{\todo[color=red!40,inline]{{\bf FIXME:} #1}}
+% \newcommand{\note}[1]{}
+% \newcommand{\matt}[1]{}
+% \newcommand{\fixme}[1]{}
+\let\comment = \note
+
+\newcommand{\arxiv}{\let\arxivFig\matt}
+
+\def\Xint#1{\mathchoice
+   {\XXint\displaystyle\textstyle{#1}}%
+   {\XXint\textstyle\scriptstyle{#1}}%
+   {\XXint\scriptstyle\scriptscriptstyle{#1}}%
+   {\XXint\scriptscriptstyle\scriptscriptstyle{#1}}%
+   \!\int}
+\def\XXint#1#2#3{{\setbox0=\hbox{$#1{#2#3}{\int}$}
+     \vcenter{\hbox{$#2#3$}}\kern-.5\wd0}}
+\def\ddashint{\Xint=}
+\def\dashint{\Xint-}
+
+
+\begin{document}
+
+\title{}
+
+
+\author{Jaydeep P. Bardhan}
+\affiliation{GlaxoSmithKline}
+\author{Nathan A. Baker}
+\affiliation{Pacific Northwest National Laboratory}
+
+\begin{abstract}
+\end{abstract}
+%We review recent progress in remedying a well-known inaccuracy of Poisson--Boltzmann (PB) continuum electrostatic models, namely the assumption that the solvent water molecules are infinitely small.  New nonlocal dielectric theories offer the ability to model short-range response more realistically, accounting for water's finite size and structure using what has been called a structured mean-field approach.  Promising results from preliminary studies suggest that nonlocal models improve prediction accuracy by reducing charge-burial penalties relevant for understanding binding affinities and pH-dependent behavior.  However, the majority of early studies address relatively simple systems (Born ions and planar membranes).  Assessments on complex biomolecules such as proteins are only now becoming feasible due to recent developments in computational methods.  We conclude by discussing opportunities to improve nonlocal models by validating them consistently against experimental measurements, all-atom explicit-solvent calculations, and classical PB.
+
+\maketitle
+
+\section{Introduction}
+
+\section{Shortcomings of Traditional Implicit-Solvent Models}
+
+\subsection{Many fitting parameters are needed.}
+
+\begin{itemize}
+\item Nina et al list 25 radii (or however many).  This may give the reader the impression that there are 25 fitting parameters.  However, this masks the fact that expert intuition was used to decide which atomtype/residue pairs should be grouped (give an example).
+\item Additional detailed fitting/decisions about groupings are needed for small molecules and post-translational modifications, such as carbohydrates (Dave Green paper). Note that number of PTMs is very large.  Makes detailed fitting impractical.
+\item 
+\end{itemize}
+
+\subsection{Models are parameterized to fit end points of free-energy plots, not landscapes}
+
+\begin{itemize}
+\item from Roux+Simonson point of view, the implicit solvent model should be able to reproduce the solvation free energy for relatively arbitrary compounds
+\item this is much the same as the idea of alchemical FEP calculations: obtaining meaningful (converged) results for transformation from one chemical group to halfway towards another
+\item Mobley's asymmetry test set highlights this challenge. not chemically realizable, but certainly reasonable.
+\item Trying to fit a nonlocal model's additional length scale parameter showed us that the nonlocal model couldn't reproduce the free energy charging curve for any value of the parameter.
+\item 
+\end{itemize}
+
+\subsection{Nonlinear response at low field strength vs high field strength}
+
+\begin{itemize}
+\item Langevin and Debye studied dielectric saturation and many models build on that (Sandberg02; Freed; Hu12 and Wei), which centers on effects at high fields
+\item however, low fields also create nonlinear response, see Beglov and Roux perturbing potential A (you noted this during my last visit to PNNL)
+\item The primary nonlinearity occurs around zero charge (Bardhan12-Jungwirth and references therein)
+\item In particular hydration asymmetry involves piecewise linear response
+\end{itemize}
+
+\subsection{Asymmetric response cannot be obtained via symmetric models of any complexity}
+\begin{itemize}
+\item Sign-symmetric nonlinear dielectric functions still give symmetric charging curves
+\item Similarly, nonlocal models coupled by simple boundary conditions give symmetric charging free curves, even if the nonlocal dielectric function can reproduce charge oscillations (overcharging)
+\item Our overcharging nonlocal model needed improvement in treatment of the dielectric function (Ren17) but its inability to reproduce asymmetric charging curves is innate, so long as we used standard (linear boundary conditions).  No matter how accurately our dielectric model reproduces epsilon(k), with traditional boundary conditions it's still symmetric
+\item Note that rigorous nonlocal models require an overlapping zone (Bochev et al), and the constraints may or may not be linear
+\item Regardless, this highlights that hydration asymmetry cannot be treated simply as either sign-symmetric nonlinearity, or by any linear theory even if it nominally captures solvent structure
+\end{itemize}
+
+\subsection{Neglect of the significant potential in a fully uncharged solute}
+
+\begin{itemize}
+\item Cerutti07. observations before then... see references in Bardhan12.
+\item to first order it has zero impact on neutral molecules, hence easy to miss
+\item deviations from linear response in Nina/Roux. explain it's where
+  quadratic term is small
+\item contributes unfavorable charging free energy for small positive charges
+\item we called this the static potential. note relationship to
+  interface potential+differences.  note field properties:
+  mathematically it's harmonic. physically it's state dependent, and
+  simulation wise it's water-model dependent.  
+\end{itemize}
+
+\subsection{Multiple origins of nonlinear response}
+\begin{itemize}
+\item 
+\end{itemize}
+
+\subsection{Lack of clarity about nonpolar solvation}
+\begin{itemize}
+\item Early ansatz: use dielectric model for electrostatics, then SASA for the remainder. argument about surface tension
+\item Simonson+Roux: turn on VDW: that's NP solvation. then charging free energy.
+\item Wagoner+Baker: subtracting off Poisson ES does not give great agreement with either SASA or SASA+volume
+\item variational models: should be parameterized together, not separable (they say it more precisely, but this is what they mean).
+\item it is true that the charging process changes van der Waals interaction energies, BUT, there is no reason to argue that one cannot parameterize the electrostatic model to include them. if it doesn't work, it doesn't work.
+\item said differently, it is absolutely possible using MD to model the energetics separately via the process described formally by Roux, and build models to reproduce these separate energetics.
+\item all of these arguments about nonpolar solvation have considered the traditional dielectric model.  
+\item many models parameterize nonpolar solvation terms by assuming the charging free energies of hydrophobic compounds are zero. this is wrong. give simple example, possibly even code.
+\item 
+\end{itemize}
+
+\section{Progress}
+
+
+\section{Recent work}
+\begin{itemize}
+\item asymmetry: Purisima FISH, Onufriev GBasym, and SLIC all find including asymmetry allows drastic reduction in the number of radii.
+\item Chipman et al max electric field nonlinearity
+\item shout outs to Mobley, Chodera et al. for automating solvation calculations
+\end{itemize}
+
+\section{Summary}
+
+* The classical electrostatic model for solvation rests on a simple physical picture and semi-macroscopic assumptions (in particular length scale separation)
+
+* Although it has furnished important insights into protein structure and function, its inaccuracies have hindered its use in many instances, forcing the use of much more expensive explicit-solvent calculations
+
+* The development of easy-to-use alchemical FEP MD approaches, and large data sets shared openly and freely, enables implicit-solvent models to be assessed in more detail than was possible previously
+
+* Using such calculations, it can be shown that nonlocal dielectric response contributes a small part of the classical model's inaccuracy, and that asymmetric response is much larger.
+
+* Similarly, using charging free energy curves (not just the endpoint) one can isolate and calibrate the two major contributors to nonlinear solvation, and see that neither is associated with the dielectric saturation effects commonly included.
+
+* From these insights, the Bardhan lab has shown that a simple model for the solvation-layer solvent nonlinear response covers a wide range of electrostatics, while not requiring atom radii to be individually parameterized.
+
+* Combined with a surface area dependent nonpolar term, the model can be fit to high accuracy using as few as a dozen solvation free energies.  
+
+* Remarkably, the model also reproduces solvation thermodynamics, solvation in mixtures, and transfer free energies between a large number of solvents.
+
+* The model also reproduces changes in solvation free energy with changes in solute charge distribution, as in changes in protonation state or redox state.
+
+* The model works equally well in both protic and aprotic solvents, suggesting that hydrogen bonding does not need to be included explicitly.
+
+* The model's accounting for the electrostatic charging free energy of hydrophobic groups suggests that we should revisit analysis of nonpolar solvation.
+
+\section*{Acknowledgments}
+JPB gratefully acknowledges support from the  the National Institute of General Medical Sciences of the National Institutes of Health under Award Number R21GM102642.  The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health.  JPB thanks M. Knepley, I. Tsukerman, D. Xie, and L. R. Scott for valuable discussions, and M. Fenley for valuable comments on the manuscript.
+
+\bibliographystyle{unsrt}
+\bibliography{bardhan-lab}
+
+\end{document}
+
+\subsection{Importance of electrostatics and continuum models}
+
+\subsection{Weaknesses of standard continuum models}
+\begin{itemize}
+\item finite size effects built into Warshel models for a long time~\cite{Papazyan97-continuum-dipole-lattice}
+\end{itemize}
+
+\subsection{Nonlocal models, specifically nonlocal dielectric not nonlocal PB}
+
+\begin{itemize}
+\item note that this is NOT a distance dependent dielectric model (see discussion in Rubinstein04)
+\item Rubinstein04 cites Pal2002 (Zewail) for effects of dynamical water at interfaces
+\end{itemize}
+
+\subsection{Outline}
+
+\section{Nonlocal-model studies of biomolecule structure and function}
+% Fernandez02 study employed a Lorentz correlation length of 5A and a hydrophobic correlation length of 1.8A.  The second study, which addressed interactions between Born ions and carbon nanotubes, also modeled the entire solute-solvent system as a homogeneous nonlocal dielectric, but did not address biological problems or compare to the local model~\cite{Scott04}.
+%\item more recently Fernandez12 used a similar model to study important loosely bound interfacial waters. this study did not compare to local electrostatics, and it also modeled the system as a homogeneous nonlocal dielectric (that is, the protein was modeled also as a nonlocal material, with the same nonlocal response properties as water).
+%\begin{itemize}
+%\item Rubinstein04: planar interface, Lorentz model, specular reflection BC. looked at pairwise interactions using cylindrical coordinates. found that for charge pairs near surface, nonlocal model had lower effective dielectric constant, due to decreased dielectric response at interface. ``It was demonstrated for short distance electrostatic interactions between the charges, located in close proximity to the interface, that the values of the effective dielectric function were greater than the bulk dielectric constant in proteins, but were remarkably smaller than those determined by the classical model of the solvent (without consideration of the nonelectrostatic solvent dipole spatial correlations). This suggests that the spatial correlation effects of the solvent dipoles can make significant contributions into the PEI energy on the exterior of proteins. These contributions, however, have been underestimated in classical electrostatic approaches.''  Note Kornyshev+Leikin2001PRL, Leikin+Kornyshev90, Buravtsev89 (in a volume I don't have), Rubinstein+Sherman2001 (volume I don't have).
+%\item Rubinstein07 later used the same model (planar geometries, Lorentz model, and specular reflection) to study protein assocation rate constants.  again they found that their nonlocal model effectively has a low-dielectric interfacial shell of water at the protein surface, which has a large impact on rate constants.  in particular, their calculations with the local model substantially overstated association rate constants, whereas their much smaller nonlocal model predictions were qualitatively accurate.
+%\item Rubinstein10 their later work addressed protein binding affinities and found that the nonlocal model reductions of desolvation effects (charge burial) lead the model to contradict the findings of HendschTidor94.
+%\end{itemize}
+
+Here we briefly survey notable biophysical studies using nonlocal electrostatic theory; more general reviews are~\cite{Fedorov07,Bardhan13_nonlocal_review}.  Kornyshev and Leikin found that the Lorentz model reproduced interactions between several categories of helical molecules including DNA and collagen~\cite{Kornyshev97_Leikin}.  More detailed study of DNA led them to predict that the sequence-dependence of the induced surface charge is large enough to enable proteins to recognize specific sequences~\cite{Kornyshev01_Leikin}.  However, these investigations did not explicitly investigate the impact of the nonlocal response compared to the traditional local-response model; thus the success of these predictions cannot yet be definitively stated to accrue to the use of a nonlocal dielectric.
+
+A. Fernandez also raised the theory's profile, in a study addressing hydrophobic effects in protein folding~\cite{Fernandez02}.  This work treated the electric potential everywhere using the Lorentz nonlocal theory (i.e. a homogeneous nonlocal continuum) with the exception that hydrophobic groups were treated as decreasing dielectric response in a small region around the group.  Such a model represents more of an effective-medium treatment rather than the heterogeneous dielectric models typically employed with traditional Poisson models.  Physical arguments suggested that backbone hydrogen bonds are most stable when surrounded by 5 hydrophobic groups, a finding which was supported by their analysis of over 2800 proteins in the PDB~\cite{Fernandez02}.  Interestingly, the hydrophobic effects on water response were assumed to decay exponentially with a different water-like length scale of 1.8~Angstroms~\cite{Fernandez02}.  Later work established that this homogeneous nonlocal model, when combined with a variational surface tension, correlates well with experimental studies of protein association and temperature denaturation~\cite{Fernandez12,Fernandez12_2}.  Because these studies did not report predictions from the traditional Poisson continuum, however, it is possible that the findings should be ascribed to other model features, not only to nonlocal response.
+
+To understand the differences between nonlocal and local electrostatics in biological processes such as binding, Rubinstein and Sherman et al.\ have used the Lorentz model with a planar interface separating (nonlocal) solvent from a (local) solute~\cite{Rubinstein04,Rubinstein07,Rubinstein10}.  Studying the pairwise interaction between a pair of solute charges near the surface, they found that the nonlocal model predicts stronger pairwise interactions: specifically, the charges interacted with ``effective dielectric constant'' between the solute dielectric constant, and the effective dielectric constant predicted by the local model~\cite{Rubinstein04}.  Given that a primary motivation for the nonlocal model is its reduced screening on short length scales, this finding is not especially surprising.  The important feature of nonlocality is that the reduced solvent screening only affects charges near the surface; that is, moving the charge pair away from the interface (deeper into the solute) causes the pairwise interaction energy to approach that of the traditional local-response model~\cite{Rubinstein04,Bardhan11_pka}.  It is worth noting that numerous groups have proposed to achieve this behavior using local electrostatics, by modeling the first hydration shell volume with a permittivity much lower than bulk, often intermediate between the solute and bulk water~\cite{}. In later work using the same model geometry, Rubinstein and Sherman et al. established more definitively that the nonlocal model effectively creates a low-dielectric interfacial water shell~\cite{Rubinstein07,Rubinstein10}.  In particular, whereas association rate constants predicted with local theory are much too large, the nonlocal-model predictions were qualitatively in line with experimental results~\cite{Rubinstein07}.  Furthermore, in studying binding affinities predicted by the two models~\cite{Rubinstein10}, they found that the effects of nonlocality on desolvation (charge burial) were substantial enough to be in disagreement with Hendsch and Tidor's findings suggesting that salt-bridge burial is usually substantially unfavorable~\cite{Hendsch94}.  We discuss the implications of this discrepancy in Section~\ref{sec:discussion}.
+
+%using calculations of pairwise interactions, binding free energies, and association rate constants, 
+
+\section{Testing biological implications using atomistically detailed models}
+
+In contrast to the numerous studies on analytical model problems that suggest important biological roles for nonlocal response,  there are relatively few studies that use atomistically detailed biomolecules.   Quantitative comparisons between local and nonlocal models have been performed for charge-burial energetics and possible effects on pKa shifts~\cite{Bardhan11_pka}.  In particular, using atomistically detailed models of titratable amino acids, it has been shown that nonlocal response can significantly reduce charge-burial penalties, enabling the use of more realistic protein dielectric constants in calculating pKa shifts~\cite{Bardhan11_pka}.  This study indicated an additional possibility for the success of high-dielectric models for pKa prediction: dielectric contrast.  (Expand on this).   A major reason for the comparative dearth of detailed modeling has been the lack of computationally efficient software for solving nonlocal models.  A number of solver applications have been put forward recently, however, including advanced finite-difference methods~\cite{Weggler10}, finite-element methods~\cite{Xie12}, and boundary-element methods~\cite{Bardhan11_dac}. Previously, calculations on proteins were qualitative, but adequate to illustrate the primary effect of nonlocal response to be a ``low pass filter'' acting on the polarization charge density.  In other words, compared to response in the standard dielectric solvent, the nonlocal solvent polarization charge density is restricted to vary more slowly as a function of position~\cite{Hildebrandt07,Bardhan11_dac}.
+
+%\begin{itemize}
+%\item Dai07 - Tsukerman paper
+%\item Hildebrandt07
+%\item Xie's work building on Scott's model and Brune FEM
+%\item Fast BEM Bardhan12DAC
+%\item Weggler10 EJIIM
+%\end{itemize}
+
+\section{Theoretical aspects of obtaining and implementing nonlocal models}
+
+Landau-Ginzburg (LG) free-energy functionals represent of the most well-developed approaches to obtaining and analyzing nonlocal models~\cite{Kornyshev97_epsilon,Medvedev04}; in this respect, nonlocal models are cousins to numerous other implicit-solvent models~\cite{}.  Order parameters for such models include fluctuations in the orientational polarization and solvent density~\cite{Kornyshev97_epsilon}, and the relationship between them remains to be explored more deeply~\cite{Medvedev04}.  In contrast, other groups have assumed a Lorentz-type nonlocal model as an ansatz via analogy to Debye relaxation in semiconductors~\cite{Fernandez02,Scott04}.  Extensions from nonlocal dielectric solvent to a nonlocal dilute electrolyte solution are straightforward~\cite{Hildebrandt04,Xie13}.
+
+Unfortunately, these approaches share a common drawback: the models assume that the solvent is infinite, or in other words that there are no interfaces or solutes that would break the system's symmetry.  This assumption leads to significant errors in the modeling of solvent response in the first hydration shell, and these waters contribute substantially to the deviations between implicit-solvent and explicit-solvent predictions~\cite{}.  For example, simply based on atom size considerations, water hydrogens can approach a solute charge more closely than water oxygens can approach, and as a result, solvent-exposed negative charges experience much more favorable solvent response than do solvent-exposed positive charges~\cite{}.  Setting aside these considerations for the time being, however, there remain important open questions regarding the treatment of the potential and field across the solute-solvent interface.  In traditional (local-response) solvent models, the boundary conditions are clearly defined: the potential is continuous and so is the normal component of the electric flux.
+
+However, two complications arise for nonlocal models.  First, the assumption of a homogeneous infinite solvent results in treating solvent polarization near the protein exactly the same as solvent polarization far away (more precisely, the dielectric model is assumed to be translation-invariant).  This can be corrected somewhat for planar interfaces~\cite{Rubinstein04,Rubinstein07,Rubinstein10}, but the extension to more complex geometries is unresolved.  The second challenge involves the calculation of the electric flux.  It is determined by an integral over the solvent volume, which is challenging to compute for large, complex molecules such as proteins.  This has been addressed in two ways; first, by approximating the boundary condition~\cite{Hildebrandt04,Hildebrandt07,Bardhan11_pka}; second, by modeling the flux using an integral over all space, which makes it a global convolution that can be computed rapidly~\cite{Xie}.  Preliminary calculations on model problems~\cite{Bardhan15_analytical_nonlocal} suggest that these simplifications give biologically indistinguishable results (D. Xie, personal communication).  
+
+%model origins
+%\begin{itemize}
+%\item Landau-Ginzburg (Dogonadze,Kornyshev97overscreening,Medvedev)
+%\item ansatz of Fernandez02, Scott04, analogy to Debye relaxation (see semiconductors)
+%\item both are usually obtained via consideration of homogeneous infinite solvent regions, i.e. in the absence of interfaces that would break symmetry.  
+%\item extensions to LPB raised by Hildebrandt. Xie has recently followed this path and gone further to nonlinear PB
+%\end{itemize}
+
+%boundary condition models
+%\begin{itemize}
+%\item for planar boundaries, specular reflection (e.g. Rubinstein04,07,10) models the response on the side opposite as if... however, it is not clear how this can extend to more complex geometries.
+%\item in the Xie model, the polarization charge is computed assuming a homogeneous medium (following, seemingly, the earlier work by Fernandez and Scott).
+%\item in the 
+%\end{itemize}
+
+\section{The road ahead: reconciling and improving nonlocal models}
+
+Marcia: A major question is, will nonlocal models reduce well known sensitivity to surface definition? (``11.  How will parametrization change when the nonlocal model is employed? Will similar issues, as seen in local PB solvers arise, such as how to define the dielectric boundary and interior dielectric constant. Are nonlocal parameters universal for all nonlocal applications?'')
+
+\begin{itemize}
+\item assess the differences between nonlocal model boundary conditions: specular reflection, Hildebrandt, Xie.  ways to assess: experimental results for charges in membranes? MD calculations. mathematically. the need to address different solvents because high diel bulk epsilon may mask errors.
+\item short range dielectric constant is 1.8 in Hildebrandt work and others, but 6 in Rubinstein04, some Kornyshev work and others (Baihua has looked at this some).  Implications: if epsilon protein = 1 or 4, then we could have inverted charge burial penalties in some cases. counter to physical intuition.  This appears the next point to resolve, now that the Lorentz length scale is settled to be about the size of one water molecule.
+\item tests on small molecules (e.g. SAMPL) assess accuracy, not just calculations on proteins to demonstrate solver speed and scaling.  Thanks to Marcia for this point
+\item Marcia: how will model test cases help in development of nonlocal models? can they be related to actual biologically relevant exp't data?
+\end{itemize}
+
+\section{Discussion}\label{sec:discussion}
+
+\paragraph{Peridynamics offers a consistent and rigorous basis to explore nonlocal continuum models.}
+\begin{itemize}
+\item questions raised by Pavel, Alex, et al in our initial discussions
+
+\item Hildebrandt truncates boundary condition, enabling fast solution
+
+\item Xie et al assume that the e field in the solute interior contributes also, not only the water. 
+
+\item Do we have existence and uniqueness proofs ?  That would be nice.
+%Lorentz model as formulated by Hildebrandt admits a purely second-kind Fredholm integral equation
+
+\item Would Dexuan be willing to share his results illustrating that the truncation did not matter on the analytical calculations we've compared?
+
+ 
+\end{itemize}
+
+Parameterization is emerging as a practical challenge for nonlocal models as well as other advanced PB approaches that add extra physically-motivated parameters.  Even in standard continuum models, important questions remain regarding the definition of the dielectric boundary~\cite{Harris15_Mackoy_Fenley,others}.   Furthermore, parameterizations that fit solvation free energies equally well are not necessarily equally accurate for predicting binding free energies~\cite{Purisima}.  Regarding the dielectric boundary question, it is possible that in nonlocal models, the reduced short-range dielectric response will greatly diminish calculation sensitivity to the probe-sphere radius, and thus differences between calculations that use van der Waals surface and those that use the Connolly solvent-excluded surface~\cite{}.  An important parallel development has been the increasing availability of databases of molecular solvation free energies computed using explicit solvent molecular dynamics, e.g.~\cite{}.  Although these data are not experiment, they do represent large data sets taken under highly consistent conditions that are easily replicated.  Furthermore, they can offer important insights not available by experiment, such as in Mobley's study of charge hydration asymmetry~\cite{Mobley08,Bardhan14_asymmetry}.  They also provide much-needed data points for fitting the nonlocal model's length-scale parameters.  The Lorentz nonlocal model has just one length scale, which is semi-empirical~\cite{Attard90} and may therefore need to take different values for different studies, similar to the use of the protein dielectric constant.  We emphasize that empirical nature of $\lambda$ means that the intuitive picture of its meaning as the length scale for correlations, should not be relied upon too heavily; actual predictions of experimental results, or at the least computational surrogates for experiments, are what matter.  Future work must address whether applications such as solvation energies of small molecules and proteins, protein--drug and protein--protein binding, and p$K_\mathrm{a}$ calculations all find essentially the same optimal $\lambda$---which would support the form of the nonlocal model---or whether very different $\lambda$ are needed, which might suggest the need for further model development.  For example, Basilevsky and Parsons found different $\lambda$ were optimal for cations and anions~\cite{Basilevsky96}, of remarkably different values compared to the 15-24~\AA~proposed by Hildebrandt~\cite{Hildebrandt04}, and the still larger values used by Xie et al.~\cite{Xie12}.  Furthermore, a recent study by Levy et al. suggests that a natural length scale would be about 2.7~\AA, about the size of one water molecule~\cite{Levy12}.  Our own work with explicit-solvent MD and nonlocal models agrees with this smaller estimate~\cite{Bardhan15_analytical_nonlocal}.  To resolve these types of questions for nonlocal models and others, an automated tool for implicit-solvent model parameterization could greatly accelerate model asssessment and convergence within the community.  
+
+
+\section{Introduction}\label{sec:intro-old}
+
+Macroscopic continuum models for the electrostatic interactions
+between molecular solutes and the surrounding solvent have been
+employed for decades \cite{Kirkwood34,Sharp90}. Modeling the solute
+and solvent as dielectric media obeying macroscopic continuum
+electrostatics, Kirkwood published in 1934 an analytical solution for
+a spherical solute with an arbitrary charge distribution in a dilute
+aqueous electrolyte solution exterior \cite{Kirkwood34}, using
+Debye--Huckel theory to approximate ionic screening.  Continuum models
+almost always take as a starting point the Poisson or
+Poisson--Boltzmann equations, which are elliptic partial differential
+equations (PDEs), a highly developed field of applied mathematics.
+They have been applied for solute models that range in theoretical
+from detail electronic structure, as in the polarizable continuum
+model
+(PCM)~\cite{Rinaldi73,Miertus81,Cances97,Mennucci97,Cances98,Scalmani04,Tomasi05,Mennucci08book},
+to atomistic models~\cite{Warwicker82,Baker01} and up to
+coarse-grained models for large macromolecules~\cite{Beard01}.
+Furthermore, the development of fast computers and efficient numerical
+algorithms has made calculating the Poisson model feasible even for
+systems with millions of atoms~\cite{Baker01,Yokota11}.
+
+
+However, the simplicity of these continuum models entails numerous
+approximations that compromise fidelity (for a recent review,
+see~\cite{Bardhan12_review}).  One of the clearest shortcomings is the
+treatment of water as a featureless continuum. It has been shown that
+in some sophisticated implicit solvent models, one recovers the
+standard Poisson model in the limit as the solvent molecules are
+infinitely small compared to the solute (with another limit to ensure
+linear response holds) \cite{Beglov96}.  The assumption of this scale
+separation is obviously flawed for small molecules such as drugs and
+ions, but the correlations between water molecules may be significant
+even for proteins.  In particular, the first few layers of mobile waters around
+a solute (often called its hydration shell) have been the subject of
+many studies~\cite{Boresch99}, and capture most of the difference
+between explicit- and implicit-solvent models~\cite{Lin02}.  One
+productive way to interpret implicit-solvent models is to see them as
+approximations to a generalized potential of mean force (PMF) that can
+be rigorously defined using statistical mechanics to integrate out the
+solvent degrees of freedom~\cite{Roux99}.
+
+Advanced continuum theories developed to provide more accurate
+approximations of the PMF can be categorized loosely using a
+two-by-two matrix, in which the columns represent linear or nonlinear
+response and the rows represent local or nonlocal
+response~\cite{Bardhan12_review}.  The classic linear mixed-dielectric
+Poisson problem and the linear Poisson--Boltzmann equation fall into
+the ``simplest'' category: response is both linear and local.  In the
+local-but-nonlinear category is the Poisson--Boltzmann equation, where
+the nonlinearity arises from a mean-field treatment of ion screening;
+recent years have seen increasing interest in local-response nonlinear
+dielectric models, as
+well~\cite{Jha08,Gong08,Gong09,Gong10,Hu12_Wei_nonlinear_Poisson_BJ}.
+The most sophisticated implicit-solvent models are both nonlocal and
+nonlinear: these include density functional
+approaches~\cite{Ramirez05}, variational methods~\cite{Cheng09_Li},
+statistical-mechanical integral
+equations~\cite{Beglov96,Kovalenko98,Luchko12,Sergiievskyi12}, and
+advanced Poisson-based
+models~\cite{Azuara08,Koehl09_2,Koehl10,Koehl11}.  Nonlinearity
+introduces numerous complications, however, and additive theories seem
+surprisingly accurate for numerous purposes~\cite{Alper90,Lin10};
+recent work by Pettitt et al. suggests that superposition can be used
+to give superb agreement with explicit-solvent
+simulations~\cite{Lin11_Pettitt}.
+
+The extensive literature in these areas of protein modeling masks a
+notable absence of models that involve linear but \textit{nonlocal}
+solvent response.  In other areas of physics, such as electrodynamics
+and elastic theory, nonlocal continuum theories have been employed for
+decades~\cite{Agarwal71,Dogonadze74,Foley75,Eringen92} to study
+problems very similar in character to molecular solvation, i.e.,
+systems in which the length scales of interest are comparable to those
+of the underlying microstructure of the material in question.  Linear
+but nonlocal models for solvent models were pioneered by Kornyshev,
+Dogonadze, and collaborators in a series of papers focused on
+electrochemistry~\cite{Dogonadze74,Kornyshev78,Vorotyntsev78,Kornyshev81},
+with later support provided by molecular dynamics
+simulations~\cite{Bopp96,Bopp98} A simplified theory, known as the
+Lorentz nonlocal model, has recently attracted significant
+attention~\cite{Basilevsky96,Basilevsky98,Scott04,Rubinstein04,Maggs06,Rubinstein07,Rubinstein10,Xie12}
+because it represents a novel model that preserves advantageous
+mathematical properties enabled by linearity (e.g., superposition) but
+respects some molecular-size effects in an intuitive, empirical way.
+Naturally, however, the simplifications mean that it is not without
+weaknesses~\cite{Attard90,Hildebrandt05,Weggler_thesis}.  For example,
+the Lorentz model captures the influence of general water ordering but
+does not capture specific water effects, e.g. bridging waters.
+Nevertheless, by providing a mathematically well-defined relationship
+that is substantially more general than local response, such nonlocal
+models may provide a partial solution to extend the length scales
+addressable by continuum theory.
+
+Unfortunately, the most natural mathematical definition of the Lorentz
+model is difficult to solve efficiently for complicated geometries
+such as proteins, and the first studies on atomistic models of
+proteins were not performed until
+recently~\cite{Hildebrandt05,Hildebrandt07}, when Hildebrandt and
+collaborators reformulated the nonlocal Poisson model as a set of
+coupled local Poisson models~\cite{Hildebrandt04}.  The transformation
+enables efficient simulation beyond analytical solution
+methods\cite{Vorotyntsev78,Rubinstein04,Bardhan12_analytical_nonlocal},
+which is important because detailed tests of the model, for instance
+in its capability to explain long-standing questions, require
+calculations capable of treating atomistic models of proteins.  For
+example, the question of the protein dielectric constant has been
+particularly
+contentious~\cite{Simonson96,Loffler97,Schutz01,Alexov97,Roca07,Lund07,Leontyev09,GarciaMoreno97};
+currently the prevailing view is that the solute permittivity is an
+empirical parameter to account for other physics not included in the
+actual Poisson model, such as flexibility~\cite{Sham98,Baker05}.  In
+pKa
+calculations~\cite{Lim91,Demchuk96,Antosiewicz96,Juffer97,Alexov97} it
+is often found that the best agreement with experimental measurements
+is obtained when using dielectric constants somewhat higher than
+experimental measurements~\cite{Gilson86}.  Sensitivity of free
+energies to the definition of the dielectric boundary have also been
+widely argued~\cite{Lim91,Hendsch94,Vijayakumar01,Tjong08,Harris14_Boschitsch_Fenley,Harris15_Mackoy_Fenley}, and
+numerous studies have suggested using two or more dielectric constants
+inside the protein, with low values inside the core and high values
+towards the solvent
+interface~\cite{Simonson96,Hofinger01,Park07,Lund07}.  Fenley et al have shown..
+
+To enable fully atomistic calculations of the Lorentz nonlocal model
+for large proteins and macromolecular complexes, we present in this
+paper our implementation of an efficient boundary-element method (BEM)
+solver called nlFFTSVD, based on our earlier work on the FFTSVD
+algorithm for linearized Poisson--Boltzmann
+solvents~\cite{Altman06,Altman09,Bardhan11_DAC}.  We validate the
+nlFFTSVD solver and describe implementation details that enable high
+performance.  Other fast BEM algorithms, such as the fast multipole
+methods~\cite{Greengard87,Greengard88,Greengard02} that have been used
+to enable linear-scaling PCM calculations~\cite{Scalmani04}, could
+also be used to enable nonlocal continuum models for studies of
+electronic structure.
+
+The techniques employed in this paper might also be useful for
+nonlocal models that appear elsewhere in nanoscale
+science~\cite{Eringen92,Engelen03,McMahon09,Wiener12,Duan07},
+generally via semi-empirical approaches to multiscale modeling in
+which the main systems of interest (here, proteins) are only
+moderately separated in scale from the particules of the constituent
+materials (water).  Advantageous analytical reformulations similar to
+Hildebrandt's have been developed for other nonlocal
+media~\cite{Ochs98,Engelen03}, and several numerical techniques have
+been proposed~\cite{Hildebrandt07,Weggler10,Hiremath12,Xie12}.
+Nevertheless, we should emphasize from the outset that the
+implementation we describe here represents only one step towards
+general, efficient solvers for nonlocal electrostatic models.  As
+noted above, the Lorentz model is overly simplistic~\cite{Attard90} and
+more sophisticated theories exist~\cite{}.  
+
+In addition, the reformulation of the nonlocal problem into a set of
+coupled local problems leads to a nonlocal boundary condition that is
+difficult to compute quickly.  To our knowledge, all published
+nonlocal-electrostatic solvers for arbitrary dielectric boundaries
+mathematically approximate this boundary condition by its local
+component to enable straightforward computation.  This approximation
+introduces an error whose magnitude and determinants are not yet
+known, so numerical software capable of such a check would represent a
+significant advance for nonlocal theory.  Therfore, in the present
+paper we may only validate that the nlFFTSVD solver represents a
+correct implementation of the model with the truncated (approximate)
+boundary condition.  
+
+%In addition, several qualitative results illustrate some of the major
+%differences between local and nonlocal theories on atomistic models of
+%proteins; our results generally support the findings of earlier
+%studies using analytically solvable geometries {[}{]}, and suggest
+%that detailed numerical simulation of realistic molecular models
+%should be pursued as the next major stage to understand the strengths
+%and weaknesses of nonlocal models. Nonlocal electrostatics have not
+%been widely used, and also present significant challenges including
+%parameterization and interpretation, so the results here should be
+%considered preliminary rather than definitive. Comparison to
+%experimental measurements and more detailed simulations are now
+%feasible and will likely lead to numerous surprises and opportunities
+%for model refinement.
+
+The paper is organized as follows.  The next section introduces nonlocal dielectric theory and demonstrates that the classical PB model is a simple limiting case in which the nonlocal length scale goes to zero.  Because nonlocal PB can be developed straightforwardly~\cite{} from a nonlocal Poisson model, we focus the discussion on water's dielectric behavior, and address ionic screening only incidentally.  Section~\ref{sec:variants} assesses the various nonlocal theories under investigation, highlighting successes and failures as well as contrasting approximations. In particular, the most widely studied models share a common inconsistency regarding the electric displacement field at the protein surface (dielectric interface).  In Section~\ref{sec:peridynamics} we suggest that peridynamics and the nonlocal calculus provide the necessary tools to develop a consistent theory.  Section~\ref{sec:discussion} concludes the paper with a broader perspective on advanced solvent models.  Please note that a full account of the literature on nonlocal theory is impossible in this survey, and interested readers are referred to reviews with more extensive bibliographies~\cite{Fedorov07,Bardhan12_review,Bardhan13}. 
+
+\global\long\def\phiomega{\varphi_{\Omega}}
+\global\long\def\psiomega{\psi_{\Omega}}
+\global\long\def\psisigma{\psi_{\Sigma}}
+\global\long\def\phisigma{\varphi_{\Sigma}}
+\global\long\def\br{{\bf r}}
+\global\long\def\brp{\br^{\prime}}
+\global\long\def\bn{{\bf n}}
+\global\long\def\epso{\epsilon_{0}}
+\global\long\def\epsomega{\epsilon_{\Omega}}
+\global\long\def\epssigma{\epsilon_{\Sigma}}
+\global\long\def\epsinfty{\epsilon_{\infty}}
+\global\long\def\brgamma{\br_{\Gamma}}
+\global\long\def\partn{\partial_{n}}
+\global\long\def\normderiv{\frac{\partial}{\partial n}}
+\global\long\def\psiomegatot{\psiomega^{\mathrm{tot}}}
+\global\long\def\phimol{\varphi_{\mathrm{mol}}}
+\global\long\def\phiomegatot{\varphi_{\Omega}^{\mathrm{tot}}}
+\global\long\def\bromega{\br_{\Omega}}
+\global\long\def\brsigma{\br_{\Sigma}}
+\global\long\def\VL{V^{L}}
+\global\long\def\KL{K^{L}}
+\global\long\def\VY{V^{Y}}
+\global\long\def\KY{K^{Y}}
+\global\long\def\VYL{V_{\Lambda}^{Y}}
+\global\long\def\KYL{K_{\Lambda}^{Y}}
+\global\long\def\ndphiomega{\frac{\partial\phiomega}{\partial n}}
+\global\long\def\ndpsi{\frac{\partial\Psi}{\partial n}}
+\global\long\def\ndphisigma{\frac{\partial\phisigma}{\partial n}}
+\global\long\def\VDR{V^{DR}}
+\global\long\def\KDR{K^{DR}}
+\global\long\def\epsomegainfty{\frac{\epsomega}{\epsinfty}}
+\global\long\def\ndphimol{\frac{\partial\phimol}{\partial n}}
+\global\long\def\GYL{G_{\Lambda}^{Y}}
+\global\long\def\GL{G^{L}}
+\global\long\def\GY{G^{Y}}
+\global\long\def\bD{{\bf D}}
+\global\long\def\bE{{\bf E}}
+\global\long\def\bP{{\bf P}}
+
+\section{Background}\label{sec:background}
+
+
+
+\section{Nonlocal Electrostatic Models}\label{sec:nonlocal}
+
+
+Nonlocal solvent models begin from seemingly familiar starting points.
+First, the electric field is still the negative gradient of the potential:
+\begin{equation}
+\bE(\br)=-\nabla\varphi(\br);
+\end{equation}
+second, Gauss's law still relates the total local charge density and the electric
+field as
+\begin{equation}
+\nabla\cdot\bE(\br)=\rho^{\mathrm{tot}}(\br)/\epsilon_0
+\end{equation}
+where the total charge density is $\rho^{\mathrm{tot}} = \rho^{\mathrm{fixed}} + \nabla \cdot \bP$.  Here we have defined the fixed charge density $\rho^{\mathrm{fixed}}$ (often point charges at solute atom centers) and the polarization charge density field $\bP$.  
+
+Nonlocal-dielectric models differ from their classical, local-dielectric counterparts in the model for the dielectric response of the medium.  Local dielectric media obey
+\begin{equation}
+  \bP(\br) = \epso \chi(\br) \bE(\br)\label{eq:P-E-local}
+  \end{equation}
+where $\chi(\br)$ is the electric susceptibility (satisfying $\epsilon(\br) = 1 + \chi(\br)$), leading to the familiar
+\begin{align}
+  \bD(\br)& = \epso \bE(\br) + \bP(\br)\\
+\bD(\br)&=\epso\epsilon(\br)\bE(\br)\label{eq:D-E-local}\\
+\nabla\cdot\bD(\br)& = \rho^{\mathrm{fixed}}(\br).\label{eq:Gauss-D}
+  \end{align}
+However, linear media can in fact obey a much more general relationship between $\bD$ and $\bE$, such as 
+\begin{equation}
+\bD(\br)=\mathcal{F}\left(\bE(\br)\right)
+\end{equation}
+where $\mathcal{F}$ is a linear operator; in nonlocal dielectric models of water, the relationship is usually written
+\begin{align}
+\mathbf{D}(\mathbf{r}) & =-\epsilon_{0}\int_{V}\epsilon(\mathbf{r},\mathbf{r}^{\prime})\bE(\brp)d\mathbf{r}^{\prime}.\label{eq:nonlocal-D-1}
+\end{align}
+We emphasize three points about Eq.~\ref{eq:nonlocal-D-1}.  First, the
+integration volume $V$ has not been specified.  Second, the classical
+local-dielectric model is recovered if
+$\epsilon(\mathbf{r},\mathbf{r}^\prime) =
+\epsilon(\mathbf{r})\delta(\mathbf{r}-\mathbf{r}^\prime)$ where
+$\epsilon(\mathbf{r})$.  Third, Eq.~\ref{eq:nonlocal-D-1} implies that
+nonlocal response leads to an \textit{integrodifferential} Poisson
+equation of the form
+\begin{equation}
+\epsilon_{0}\nabla_{\mathbf{r}}\cdot \int_{\Sigma}\epsilon(\mathbf{r},\mathbf{r}^{\prime})\nabla_{\mathbf{r}^{\prime}}\varphi_\Sigma(\mathbf{r}^{\prime})d\mathbf{r}^{\prime}=-\rho_\Sigma(\mathbf{r}).\label{eq:integrodifferential-Poisson}
+\end{equation}
+In other words, nonlocal models are a more general class of continuum dielectric theories, and cannot be written in terms of the familiar Poisson equation
+\begin{equation}
+\nabla\cdot\left(\epsilon(\br)\nabla\varphi(\br)\right)=-\rho^{\mathrm{fixed}}(\br)/\epsilon_0.\label{eq:initial-local-model}
+\end{equation}
+
+
+
+
+where $\varphi(\br)$ is the electrostatic potential,
+$\rho^{\mathrm{fixed}}(\br)$ is the fixed charge distribution in the
+solute (as opposed to polarization charges associated with dielectric
+response), $\epsilon_0$ is the permittivity of free space, and
+$\epsilon(\br)$ is the spatially varying relative permittivity or
+dielectric constant.  For simplicity we focus on a problem with a
+single solute molecule, denoting its interior by $\Omega$ and the
+infinite solvent exterior region by $\Sigma$. The boundary separating
+these volumes is commonly assumed to be sharp (i.e. the dielectric
+constant $\epsilon(\br)$ is piecewise constant), and denoted by
+$\Gamma$. The solute charge distribution is denoted by
+$\rho^{\mathrm{fixed}}(\br)$ and assumed to consist of $N_{q}$
+discrete point charges.
+
+A key point is that nonlocal models look fundamentally different from
+Eq.~(\ref{eq:initial-local-model}), because 
+
+already assumes local dielectric
+response; to highlight the central difference between local and
+nonlocal models, we must be explicit about the underlying, more
+fundamental, relations.  
+
+
+Second, Eq.~(\ref{eq:initial-local-model}) postulates that at each
+point $\br$, the electric field $\bE(\br)$ induces in the dielectric
+a \textit{polarization density} $\bP(\br)$ that represents the
+average dipole moment of the material at $\br$:
+
+
+; the
+divergence of $\bP(\br)$ then represents a charge density that is
+often called the \textit{bound charge}, because it is ``bound'' to the
+constituent particles that make up the dielectric material.  Third,
+
+Defining the electric-displacement field
+For any closed surface enclosing a volume that does not contain any
+fixed charges, the potential and the normal component of the
+displacement field are continuous:
+\begin{align}
+\varphi(\br^+)-\varphi(\br^-)=&0\\
+(\bD(\br^+)-\bD(\br^-))\cdot\hat{\mathbf{n}}(\br)=&0\label{eq:D-general-boundary-condition},
+\end{align}
+where $\br^+$ and $\br^-$ represent points just ``inside'' and
+``outside'' the boundary $\Gamma$, respectively, so that $\br^+ =
+\lim_{\delta \rightarrow 0+} \br_\Gamma + \delta
+\hat{\mathbf{n}}(\br_\Gamma)$.  In the mixed-dielectric Poisson model
+for non-ionic solutions, there are no fixed charges in the solvent, so
+$\nabla\cdot\mathbf{D}_\Sigma(\br) = 0$ and the full problem is
+\begin{align}
+\nabla^{2}\phiomega(\br) & =-\frac{1}{\epso\epsomega}\rho(\br)\label{eq:local-Poisson-protein}\\
+\nabla^{2}\phisigma(\br) & =0\label{eq:local-Poisson-solvent}\\
+\phiomega(\brgamma) & =\phisigma(\brgamma)\label{eq:local-pot-bc}\\
+\epsomega\ndphiomega(\brgamma) & =\epssigma\ndphisigma(\brgamma).\label{eq:local-D-bc}
+\end{align}
+This problem is well posed under the assumption that the potential and
+normal derivative approach zero sufficiently quickly as
+$||\br||\to\infty$ \cite{Jackson_classical_electrodynamics,Juffer91}.
+
+As noted above, the mixed-dielectric Poisson problem treats only pure
+water solvent, that is, as a dielectric medium containing no mobile
+fixed charges such as ions.  Physiological solutions do contain ions,
+however, with sodium, calcium, and other ions playing essential
+biological roles.  The simplest treatment of ionic screening in the
+solvent replaces the Laplace equation of
+Eq.~(\ref{eq:local-Poisson-solvent}) with the linearized
+Poisson--Boltzmann equation (LPBE)~\cite{Kirkwood34,Sharp90,Honig95}
+\begin{equation}
+\nabla^2 \varphi_\Sigma(\br) = \kappa^2 \varphi_\Sigma(\br),\label{eq:local-LPBE}
+  \end{equation}
+where $\kappa$ is a parameter known as the the inverse Debye length,
+which is about 0.125~\AA$^{-1}$ for physiological solutions.  The LPBE
+adds a crude, mean-field treatment of ionic screening that treats ions
+as point charges and neglects ion--ion correlations, but is
+mathematically simple and can be computed numerically very
+efficiently~\cite{Baker01,Lu06,Altman09}.  
+Eq.~(\ref{eq:local-LPBE}) is known in other fields of physics as the
+Yukawa or screened-Poisson equation.
+
+The potential in the solute $\varphi_\Omega(\br)$ is the sum of the
+direct Coulomb potential induced by the fixed charges, and a
+\textit{reaction potential} that arises because the solute and solvent
+have different dielectric properties.  The fixed charges induce the
+Coulombic potential field
+\[
+\phimol(\br)=\sum_{k=1}^{N_{q}}\frac{q_{k}}{4\pi||\br-\brp||},
+\]
+and the free energy associated with the solvent reaction to the fixed charge is
+\begin{align}
+  \Delta G_{\mathrm{reac}} &= \int_\Omega \rho^{fixed}(\br) (\varphi_\Omega(\br)-\phimol(\br)) d^3 \br\\
+  &= \sum_{i=1}^{N_q} q_i \varphi_{\mathrm{reac}}(\mathbf{r}_i)\label{eq:delta-G-solv-kinda}
+\end{align}
+where we have defined the \textit{reaction potential} $\varphi_{\mathrm{reac}}$ as
+\begin{equation}
+  \varphi_\Omega(\br) = \phimol(\br) + \varphi_{\mathrm{reac}}(\br).\label{eq:potential-split}
+\end{equation}
+The free energy in Eq.~(\ref{eq:delta-G-solv-kinda}) is often termed
+the solvation free energy, but one must emphasize the importance of
+the reference state for its calculation. This reference state is often
+defined to be the solute in a homogeneous medium with dielectric
+constant equal to that of the solute, i.e. so that
+$\epsilon_{\Omega}=\epsilon_{\Sigma}$.  This is convenient because
+then the solvation free energy can be easily computed with only a
+single simulation (the energy of the reference state is purely
+Coulombic, and so does not require an explicit solution of the Poisson
+equation). When the reference state is defined otherwise, one must
+find the reaction energy in both states~\cite{Hildebrandt05}.
+
+
+\subsection{Kornyshev}
+
+Dogonadze and Kornyshev pioneered the application of nonlocal
+dielectric theory to aqueous electrolytes~\cite{}, and unfortunately
+here we can present only a brief outline of their extensive
+contributions (recently reviewed in~\cite{}).  Their earliest studies
+focused on the structure of the electric double layer at the
+electrode--electrolyte interface, using primarily analytically
+solvable systems such as planar half-spaces and finite-width
+slabs~\cite{}.  The focus on metal electrodes provided an important
+simplification because then the potential only needed to be solved in
+the solvent volume. Interfaces between dielectric materials requires
+more care in addressing the displacement-field boundary condition, yet
+are still tractable for simple geometries.  These early studies
+frequently addressed water response at multiple length and time
+scales, for instance to address intermolecular hydrogen bonds~\cite{}.
+The model was later simplified to the phenomenological Lorentz
+nonlocal dielectric, which we address in the following section.
+
+Their work introduced two simplifying assumptions which have been
+adopted in most of the investigations that followed.  First, the the
+solute's presence and shape are assumed to not perturb the dielectric
+response function.  The dielectric function $\epsilon(r,r')$
+becomes translation invariant, affording dramatic simplifications in
+the integral in the integrodifferential Poisson equation.  The second
+assumption, considering the dielectric to be isotropic, likewise
+simplifies the problem by reducing the volume integral to a scalar
+convolution.  (I believe that their discussions of these involve the
+so-called dielectric approximation, must go find.)
+
+However, these models failed to adequately model
+charge overcreening---oscillations in the solvent charge distribution
+in the hydration shell~\cite{}.  Kornyshev and Sutmann found that
+all-atom explicit-solvent simulations could indeed reproduce
+experimental measurements of the water dielectric function~\cite{},
+which led to their development of a nonlocal model that captures the
+essential features of this complex phenomenon~\cite{}.  \textbf{We
+  could add a figure here illustrating the differences.  I've attached
+  a figure from my R01}
+\begin{figure}
+\centering \resizebox{3.0in}{!}{\includegraphics{final-nonlocal.eps}}
+\caption{Different dielectric models of water; note that this does not include the earliest three mode theory.\label{fig:electrostatic-problem}}
+\end{figure}
+On the other hand, foreshadowing our conclusion that stronger
+mathematical frameworks are needed for progress in this field,
+Basilevsky and Parsons found that their numerical methods did not
+always converge for nonlocal models with such oscillations~\cite{}.
+
+\subsection{Lorentz Nonlocal Model}
+The Lorentz nonlocal model of water defines 
+\begin{equation}
+\epsilon(\mathbf{r},\mathbf{r}^{\prime})=\epsilon(|\mathbf{r}-\mathbf{r}^{\prime}|)=\epsilon_{\infty}\delta(\mathbf{r}-\mathbf{r}^{\prime})+\left(\frac{\epsilon_{\Sigma}-\epsilon_{\infty}}{4\pi\lambda^{2}}\right)\left(\frac{e^{-\frac{|\mathbf{r}-\mathbf{r}^{\prime}|}{\lambda}}}{|\mathbf{r}-\mathbf{r}^{\prime}|}\right).\label{eq:dielectric-function-Lorentz}
+\end{equation}
+where $\epsilon_\Sigma$ is the bulk dielectric constant for the medium
+as usual, which captures response at long length scales.  The model
+introduces two parameters associated with short-range response:
+$\epsilon_\infty$ is the optical dielectric constant for the medium
+(here, taken to be 1.8 for water), and $\lambda$ is an effective
+parameter capturing the length scale of nonlocal response~\cite{}.
+
+\subsubsection{Displacement Field / Dielectric Flux}
+In bulk solvent, it is naturally to take the domain of the volume
+integral for the displacement field $\bD$ to be the entire space.  On
+the other hand, a complication arises when the solute volume is to be
+modeled explicitly, e.g. a protein, and the potential is desired
+inside.  Hildebrandt et al. took the volume of integration to be the
+solvent exterior only~\cite{Hildebrandt04}, considering the field
+inside the solute to not affect the polarization response in the
+water~\cite{Hildebrandt05,Weggler_thesis}.  In contrast, Xie et
+al. take the volume of integration to be over all space~\cite{}.  This
+assumption provides a direct route to efficient simulation by standard
+PDE solvers~\cite{}.  However, the physical implication is that the
+electric field at a point in vacuum directly creates a polarization
+charge in water. 
+
+\subsubsection{Boundary conditions}
+
+Modern studies of nonlocal theory address the case of sharp boundaries
+between domains, for example a discontinuous dielectric constant
+between protein and water.  However, the justification for a
+discontinuous dielectric boundary is not clear, and arguments have
+been raised in support of smoothly varying dielectric
+constants~\cite{}.  To this end, it seems important to seek nonlocal
+models with suitably smooth transition regions between the solvent and
+solute dielectric properties.
+
+However, nonlocal-model boundary conditions are not well resolved even
+in the case of sharp boundaries.  In biomolecular applications to
+date, the solute has been modeled as a local-response dielectric.  At
+the interface to the nonlocal-dielectric solvent, the familiar
+displacement-field boundary condition
+\begin{equation}
+\bn\cdot\bD_{solute} = \bn\cdot \bD_{solvent}
+\end{equation}
+is nonlocal, because $\bD_{solvent}$ depends on the specified volume
+integral.  Xie's model of the displacement field as a global volume
+integral enables this boundary condition to be treated exactly and
+quickly~\cite{}.  On the other hand, Hildebrandt's use of the solvent
+volume necessitates either approximation or expensive numerical
+integration~\cite{Hildebrandt04,Hildebrandt05,Weggler_thesis}. Their
+use of the Lorentz model led to the nonlocal BC to be approximated
+as the local term only, i.e. instead of
+\begin{equation}
+  \bD_{solvent}(r_{\mathrm{surface}}) = \epsilon_\infty \epso \bE(r_{\mathrm{surface}}) + \int dV'
+  \end{equation}
+they used
+\begin{equation}
+  \bD_{solvent}(r_{\mathrm{surface}}) = \epsilon_\infty \epso \bE(r_{\mathrm{surface}}).
+  \end{equation}
+Although the physical justification for this approximation is
+reasonable and its accuracy is supported by simple
+calculations~\cite{Weggler_thesis}, its implications and possible
+failures are not understood.  
+
+We therefore have two theories, both alike in dignity (passable at
+best), which invoke complementary simplifications to make biomolecular
+calculations practical.  Each simplification trades off the physically
+reasonable treatment of the complementary aspect of the problem: the
+displacement field's region of dependence or the boundary condition.   
+
+\subsection{Tests}
+
+Despite the variations between Lorentz nonlocal models, they do
+robustly predict that solvation free energies are smaller in magnitude
+compared to solvation free energies predicted with local-response
+theory~\cite{}.  This arises in the same way that solvation free
+energies decrease by including a solvent shell modeled with
+intermediate dielectric constant (Boda; Bockris?  saw an old image
+from Alexey's talk in Genoa...).  As an aside, limiting unphysically
+strong screening with a shell is ultimately the same thing that
+underlies the use of Stern layers: semi-phenomenological and useful.
+
+Recent nonlocal studies have assessed Lorentz models using monatomic
+Born cations~\cite{Kornyshev,Basilevsky,Hildebrandt04,Xie}.
+Unfortunately, the failures of classical Poisson models on this data
+set do not accurately represent the failures on anions, let alone on
+polyatomic solutes.  First, if the ion radii are to be fit, then the
+model is underdetermined, because one has $N$ measurements (solvation
+free energy) but more than $N$ parameters to fit: $N$ radii and at
+least one nonlocal parameter, the correlation length $\lambda$.
+Second, if the radii are to be taken as given, then the basis for
+their selection must be taken consistently, and with some care, as
+sound arguments can be made for different choices depending on the
+context~\cite{Rashin,others}.  Naturally, using radii that are too
+small leads standard PB models to grossly overstate the solvation free
+energy.  In fact, though, local-model calculations provide reasonable
+answers if one chooses radii in accordance with the ``apparent''
+dielectric boundary, estimated as the distance at which the water
+charge density changes from zero.  (I don't know of a paper that
+addresses this point directly.  Nathan?  we can get it in here easily
+if its warranted).  Inappropriately small ion radii have led several
+groups to suggest that Lorentz models of water should have $\lambda >
+10$~\AA.  This conflicts with earlier work by Kornyshev and
+others~\cite{Kornyshev,Basilevsky}, who showed good agreement for
+$\lambda \approx 1-3$~\AA.  
+
+First application to atomistic models, Bardhan demonstrated that
+charge burial penalties are reduced.
+
+\subsection{Recent developments}
+
+Nonlocal dielectric theories are readily extended to include ionic
+screening at the Poisson--Boltzmann level (find Kornyshev discussion;
+Hildebrandt discussion; Xie et al.).  Xie et al. have demonstrated an
+efficient finite-element method implementation for nonlocal
+Poisson--Boltzmann~\cite{}.  
+
+We conducted explicit-solvent free-energy
+perturbation calculations to parameterize $\lambda$ against modern MD
+force fields~\cite{Bardhan12_asymmetry}, which accurately predict ion
+solvation free energies. Our results supported $\lambda < 5$~\AA, with
+larger values dramatically impacting accuracy for deeply buried
+charges~\cite{Bardhan14_MBMB}.
+
+Charge hydration asymmetry (CHA) represents a third major problem with
+using cations exclusively as a model test: positively and negatively
+charged ions of equal size experience very different solvation free
+energies~\cite{}.  
+
+
+First, anions exhibit larger solvation energies than classical Poisson
+models predict.
+
+Using an extended version of the Lorentz-model's reformulation,
+Bardhan has obtained a coupled system of PDEs for the BKLS model that
+exhibits overscreening and solvent charge oscillations.
+
+Analyzing the epsilon vs k plot also shows that the Lorentz model does
+the wrong thing at low length scales!
+
+Parameterization suggested that asymmetry is a larger factor than
+nonlocality.
+
+
+\subsection{Criticisms}
+
+Real solvent dielectric response is considerably more
+complex~\cite{Attard90,Bopp96,Cherepanov04} and is markedly
+anisotropic~\cite{Bonthuis11}.
+
+Second, even the multiscale BKLS model can't get asymmetry right, if
+you think about it.  Hence the boundary conditions must be wrong, or
+something else.  It is worth noting that Tsukerman's work on
+homogenization for the electromagnetic properties of metamaterials has
+driven the development of alternative formulations of boundary
+conditions for structured media~\cite{}.
+
+These criticisms motivates a stronger theoretical framework, and in
+the next section we present one promising approach.
+
+
+
+\section{Peridynamics and Nonlocal Calculus}\label{sec:peridynamics}
+
+\subsection{Origins of Peridynamics}
+
+\subsection{Boundary conditions are associated with regions of finite volume}
+
+\subsection{Possible applications}
+
+
+
+%For modelers who share code, alleviates difficulties of being consistent, thorough.  There should be no justification for continuing publishing models that don't work.  We have standard file format (PQR) and good tools for preparing them.
+%\item It would be valuable to have an automated approach.  Advantages of an automated tool: 
+  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  
+The present paper avoids drawing quantitative conclusions about
+energetic differences between the local and nonlocal models.  This is
+because such comparisons require a meaningful and thorough
+parameterization~\cite{Osapay96}, including not only radii and charges
+but now also the solvent length scale.  
+
+
+
+Regardless, the successful implementation of the nlFFTSVD solver means
+that the challenge of parameterization is now a feasible (though, as
+always, nontrivial \cite{Nina97}) process. Undertaking
+parameterization without an efficient solver would have been
+premature, requiring large amounts of computer resources without much
+justification for the extreme cost. The development of an efficient
+solver will also enable the first tests of several modeling
+assumptions whose validity must be studied in more detail. Here, we
+have assumed linear response~\cite{Aqvist96,Gong08}; a dielectric
+function with a simple functional form suitable for deriving a BIE
+method and fast solver~\cite{Attard90,Bopp96,Hildebrandt05}; an
+approximate boundary condition to relate the electrostatic and
+displacement potentials in the solvent~\cite{Weggler_thesis}; and a
+nonlocal relationship between the solvent fields that does not account
+for the dielectric boundary except in the simplest possible
+manner. Some of these assumptions are more easily tested using
+volume-based solvers such as finite-difference and finite-element
+methods\cite{Baker01,Holst00,Luo02,Gilson85,Xie12}, as well as the new
+EJIIM solver \cite{Weggler10}.  However, the present BEM solver
+represents an alternative approach with the standard advantages of BIE
+methods~\cite{Juffer91}.  Numerous and diverse opportunities exist for
+contributing fundamental knowledge to our understanding of nonlocal
+electrostatics and its suitability for biomolecular modeling.
+
+
+
+
+which is a very different type of problem than the familiar Poisson
+PDE of Eq.~(\ref{eq:initial-local-model}).  Modeling a non-ionic
+solvent in which $\rho_\Sigma = 0$, the overall nonlocal-dielectric
+model is
+\begin{align}
+\nabla^{2}\varphi_{\Omega}(\mathbf{r}) & = \frac{-\rho^{\mathrm{fixed}}(\mathbf{r})}{\epsilon_{0}\epsilon_{\Omega}} & \quad & \mathbf{r}\in\Omega\\
+\nabla_{\mathbf{r}}\cdot\int_{\Sigma}\epsilon(\mathbf{r},\mathbf{r}^{\prime})\nabla_{\mathbf{r}^{\prime}}\varphi_{\Sigma}(\mathbf{r}^{\prime})d\mathbf{r}^{\prime} & = 0 &  & \mathbf{r},\mathbf{r}^\prime\in\Sigma\label{eq:integrodifferential-solvent-Poisson-group}\\
+\left[\varphi_{\Omega}(\mathbf{r})-\varphi_{\Sigma}(\mathbf{r})\right] & =0 &  & \mathbf{r}\in\Gamma\\
+\left[\nabla_{\mathbf{r}}(\epsilon_{\Omega}\varphi_{\Omega}^{\mathrm{tot}}(\mathbf{r}))-\int_{\Sigma}\epsilon(\mathbf{r},\mathbf{r}^{\prime})\nabla_{\mathbf{r}^{\prime}}\varphi_{\Sigma}(\mathbf{r}^{\prime})d\mathbf{r}^{\prime}\right]\cdot\mathbf{\hat{n}} & =  0 &  & \mathbf{r}\in\Gamma\label{eq:nonlocal-D-field-boundary-condition}
+\end{align}
+Note that $\varphi_\Omega(\br)$ is the total potential in the solute
+and that Eq.~(\ref{eq:nonlocal-D-field-boundary-condition}) is the
+nonlocal form of the displacement-field boundary condition in
+Eq.~(\ref{eq:D-general-boundary-condition}).
+
+
+
+
+material including local
+and nonlocal dielectric theory, boundary-integral equation (BIE)
+approaches to solving Poisson-type partial-differential equations
+(PDEs), and the boundary-element method (BEM) for the numerical
+simulation of BIEs.  To introduce nonlocal response, our description
+of the familiar local-response Poisson continuum model begins from a
+more abstract perspective than usual.  Section
+\ref{sec:boundary-integral-formulation} presents the purely BIE
+formulation of the nonlocal model, and \ref{sec:Efficient-Solution-of}
+then describes our implementation in detail: how we solve the BIE
+formulation efficiently using FFTSVD, and preconditioning.  In Section
+\ref{sec:Computational-Results} we present computational results to
+verify our implementation and illustrate that simulation time and
+memory usage scale essentially linearly with problem size.  We also
+demonstrate an important feature of the fast-BEM approach, that
+nonlocal BIE problems require essentially the same amount of time and
+memory as are needed to solve local linearized Poisson--Boltzmann
+problems.  Section \ref{sec:Discussion} summarizes the work, notes
+significant remaining challenges, and concludes by outlining
+directions for future study.
